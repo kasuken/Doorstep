@@ -6,4 +6,4 @@
 #   GitHub Pages:   https://<your-user>.github.io/<repo>/dashboard.png
 DASHBOARD_URL="https://kasuken.github.io/Doorstep/dashboard.png"
 
-"$(dirname "$0")/../xh" -d -q --check-status --timeout 30 -o "$1" get "$DASHBOARD_URL?t=$(date +%s)"
+"$(dirname "$0")/../xh" -d -q --ignore-stdin --check-status --timeout 30 -o "$1" get "$DASHBOARD_URL?t=$(date +%s)"

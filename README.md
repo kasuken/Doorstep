@@ -109,17 +109,37 @@ Caveats:
 >
 > The jailbreak depends on your exact model and firmware. Look these up first: on the Kindle, go to **Menu → Settings** and read the version at the bottom of the page. Follow the jailbreak thread for that model on the [MobileRead Kindle Developer's Corner](https://www.mobileread.com/forums/forumdisplay.php?f=150). Don't use random YouTube guides.
 
-1. **Jailbreak the Kindle.** Then install **KUAL**, the app launcher, as described in the same MobileRead threads.
-2. **Connect it to your Wi-Fi** through the normal Kindle settings.
-3. **Download the kindle-dash release.** Get the latest **release tarball** from <https://github.com/pascalw/kindle-dash/releases>. The repo source is missing the prebuilt `xh` and `next-wakeup` ARM programs, so it won't work.
-4. **Copy the files over USB.** The Kindle shows up as a USB drive.
-   - Copy the release's files into a folder named `dashboard` on the drive. The Kindle sees it as `/mnt/us/dashboard`.
-   - Replace `dashboard/local/env.sh` and `dashboard/local/fetch-dashboard.sh` with the two files from this repo's `kindle/local/`.
-   - Copy the release's `KUAL/kindle-dash` folder into `extensions/` on the drive.
-5. **Set the image address.** Edit `dashboard/local/fetch-dashboard.sh` and set `DASHBOARD_URL` to your laptop's IP or your GitHub Pages URL.
-6. **Start the dashboard.** Eject the drive, open **KUAL → kindle-dash**, and start it. The dashboard appears and the Kindle goes to sleep about 10–15 seconds later.
+Tested on a **Kindle 4 non-touch (silver, serial B00E…), firmware 4.1.4**. Each step uses the Kindle's own menus and USB drive. You don't need KUAL.
 
-**To exit:** hold the power button until the Kindle restarts. After a restart it boots back to the normal Kindle.
+1. **Jailbreak.** Download `kindle-k4-jailbreak-1.8.N.zip` from the [MobileRead JailBreak thread](https://www.mobileread.com/forums/showthread.php?t=191158). It covers firmware 4.0.0 to 4.1.4.
+   - Copy `data.tar.gz`, `ENABLE_DIAGS` and the `diagnostic_logs` folder to the root of the Kindle drive.
+   - Eject and unplug the Kindle, then restart it: **Menu → Settings → Menu → Restart**.
+   - In the diagnostics menu, choose **D) Exit, Reboot or Disable Diags → R) Reboot System → Q) To continue**. When it asks for "FW Left", press left on the 5-way button.
+   - It worked if a book called **"You are Jailbroken"** appears.
+2. **Install USBNetwork.** Download `kindle-usbnetwork-0.57.N-k4.zip` from the [MobileRead hacks thread](https://www.mobileread.com/forums/showthread.php?t=88004).
+   - Copy `Update_usbnetwork_0.57.N_k4_install.bin` to the drive root.
+   - Unplug, then run **Menu → Settings → Menu → Update Your Kindle**. You should now have a `usbnet` folder on the drive.
+3. **Turn on SSH over Wi-Fi with a key.** Over USB:
+   - In `usbnet/etc/config`, set `K3_WIFI="true"` and `K3_WIFI_SSHD_ONLY="true"`. Use Unix line endings.
+   - Put your RSA public key in `usbnet/etc/authorized_keys`. The 2015 dropbear doesn't accept ed25519 keys.
+     ```bash
+     ssh-keygen -t rsa -b 3072 -N "" -f ~/.ssh/doorstep_kindle_rsa
+     ```
+4. **Copy kindle-dash.** Get the **release tarball** from <https://github.com/pascalw/kindle-dash/releases>, not the repo source: only the release has the prebuilt ARM programs `xh` and `next-wakeup`.
+   - Unpack it into a `dashboard` folder on the drive. The Kindle sees it as `/mnt/us/dashboard`.
+   - Replace `local/env.sh` and `local/fetch-dashboard.sh` with this repo's `kindle/local/` files, and set `DASHBOARD_URL`.
+5. **Start USBNetwork.** Unplug the Kindle with Wi-Fi on. On the home screen, press the keyboard key and enter these three searches one at a time: `;debugOn`, then `~usbNetwork`, then `;debugOff`. Nothing visible happens.
+6. **Find the Kindle and start the dashboard.** Its SSH server identifies itself as `SSH-2.0-dropbear_2015.68`. Your router's device list, or a quick port-22 scan, shows its IP. Then run:
+   ```bash
+   ssh -i ~/.ssh/doorstep_kindle_rsa -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa root@<kindle-ip> "cd /mnt/us/dashboard && (trap '' HUP; ./start.sh) </dev/null >/dev/null 2>&1 &"
+   ```
+   The dashboard appears. About 10 seconds later the Kindle suspends until the next scheduled update. The log is in `dashboard/logs/dash.log`.
+
+**Two Kindle quirks that matter:**
+- **`--ignore-stdin` is required.** Without it, `xh` waits forever for a request body whenever its input isn't a terminal. `fetch-dashboard.sh` already passes this flag.
+- **There's no `nohup` or `setsid`.** BusyBox 1.7.2 on the Kindle has neither, so the `trap '' HUP` above keeps kindle-dash alive after SSH disconnects.
+
+**To exit, or after a restart:** hold the power button for about 20 seconds. The Kindle boots back to its normal home screen. To start Doorstep again, repeat steps 5 and 6.
 
 ### Settings already set in `kindle/local/env.sh`
 
