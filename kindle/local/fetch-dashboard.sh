@@ -4,6 +4,6 @@
 # Pick ONE URL:
 #   Laptop server:  http://192.168.1.50:8080/dashboard.png   (use your laptop's LAN IP)
 #   GitHub Pages:   https://<your-user>.github.io/<repo>/dashboard.png
-DASHBOARD_URL="http://192.168.1.50:8080/dashboard.png"
+DASHBOARD_URL="https://kasuken.github.io/Doorstep/dashboard.png"
 
 "$(dirname "$0")/../xh" -d -q --check-status --timeout 30 -o "$1" get "$DASHBOARD_URL?t=$(date +%s)"

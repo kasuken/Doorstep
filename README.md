@@ -19,6 +19,8 @@ Doorstep turns an old non-touch Kindle (the one with buttons) into a screen you 
 | :---: | :---: | :---: | :---: |
 | ![rainy](docs/screenshots/rainy-morning.png) | ![snow](docs/screenshots/snow-day.png) | ![summer](docs/screenshots/summer-afternoon.png) | ![offline](docs/screenshots/offline.png) |
 
+The live image for Zurich is published at <https://kasuken.github.io/Doorstep/dashboard.png>, refreshed by GitHub Actions.
+
 Regenerate these with `npm run demo`. It uses made-up data and needs no network, apart from the live mockup at the top.
 
 There is no live clock on purpose. A screen that updates every 4 hours would show the wrong time most of the day.
