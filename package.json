@@ -1,0 +1,19 @@
+{
+  "name": "doorstep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An e-ink entrance display for an old Kindle: weather, what to bring, and Bitcoin, refreshed every 4 hours.",
+  "type": "module",
+  "scripts": {
+    "render": "node src/render.js",
+    "serve": "node src/server.js",
+    "demo": "node src/demo.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.65"
+  },
+  "license": "MIT"
+}
